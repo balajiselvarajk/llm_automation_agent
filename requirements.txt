@@ -6,3 +6,9 @@ python-multipart
 pillow
 sqlalchemy
 markdown2
+python-dotenv
+numpy
+requests
+sentence-transformers
+scikit-learn
+sqlite3

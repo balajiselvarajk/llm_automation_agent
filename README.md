@@ -1,3 +1,5 @@
+# Project 1 - LLM-based Automation Agent
+
 ## Background
 
 You have joined the operations team at **DataWorks Solutions**, a company that processes large volumes of log files, reports, and code artifacts to generate actionable insights for internal stakeholders. In order to improve operational efficiency and consistency, the company has mandated that routine tasks be automated and integrated into their Continuous Integration (CI) pipeline.

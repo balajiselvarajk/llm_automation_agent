@@ -17,6 +17,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load API token from environment variable
+#AIPROXY_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImJhbGFqaS5zZWx2YXJhakBzdHJhaXZlLmNvbSJ9.Aq2jut-PmmCni9bYObbNgEkvkwTNvSisNrZdE1pazq8"
 
 # Load environment variables from .env file
 load_dotenv()
@@ -24,6 +25,8 @@ load_dotenv()
 # Access the AIPROXY_TOKEN variable
 AIPROXY_TOKEN = os.getenv('AIPROXY_TOKEN')
 
+print('comes')
+print(AIPROXY_TOKEN)
 
 app = FastAPI()
 
@@ -59,8 +62,8 @@ def parse_date_string(date_str):
     raise ValueError(f"time data '{date_str}' does not match any known format")
 
 # A3: Count the number of Wednesdays in /data/dates.txt and write the number to /data/dates-wednesdays.txt
-def count_wednesdays_in_dates(file_path, output_folder):
-    with open(file_path, "r") as f:
+def count_wednesdays_in_dates(input_path, output_folder):
+    with open(input_path, "r") as f:
         dates = f.readlines()
     wednesdays = sum(1 for date in dates if parse_date_string(date.strip()).weekday() == 2)
     with open(output_folder, "w") as f:
@@ -75,21 +78,21 @@ def sort_contacts_by_name(input_path, output_folder):
         json.dump(sorted_contacts, f, indent=4)
 
 # A5: Write the first line of the 10 most recent .log files in /data/logs/ to /data/logs-recent.txt
-def write_recent_log_first_lines(input_folder, output_folder):
+def write_recent_log_first_lines(input_path, output_folder):
     log_files = sorted(
-        [f for f in os.listdir(input_folder) if f.endswith(".log")],
-        key=lambda x: os.path.getmtime(os.path.join(input_folder, x)),
+        [f for f in os.listdir(input_path) if f.endswith(".log")],
+        key=lambda x: os.path.getmtime(os.path.join(input_path, x)),
         reverse=True
     )
     with open(output_folder, "w") as f:
         for log_file in log_files[:10]:
-            with open(os.path.join(input_folder, log_file), "r") as lf:
+            with open(os.path.join(input_path, log_file), "r") as lf:
                 f.write(lf.readline())
 
 # A6: Create an index file mapping filenames to their titles from Markdown (.md) files
-def create_markdown_index(input_folder, output_folder):
+def create_markdown_index(input_path, output_folder):
     index = {}
-    for root, _, files in os.walk(input_folder):
+    for root, _, files in os.walk(input_path):
         for file in files:
             if file.endswith(".md"):
                 with open(os.path.join(root, file), "r") as f:
@@ -106,7 +109,7 @@ def extract_email_sender(input_path, output_folder):
         email_content = f.read()
     
     prompt = f"Extract the sender's email address from the following email content:\n\n{email_content}"
-    url = "http://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
+    url = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {AIPROXY_TOKEN}"
@@ -153,7 +156,7 @@ def extract_credit_card_number(input_path, output_folder):
     data_uri = f"data:image/png;base64,{image_b64}"
     
     # Define the API endpoint and headers
-    url = "http://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
+    url = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {AIPROXY_TOKEN}"
@@ -203,21 +206,21 @@ def extract_credit_card_number(input_path, output_folder):
         print(f"Error: {response.status_code} - {response.text}")
 
 # A9: Find the most similar pair of comments in /data/comments.txt
-def find_most_similar_comments(input_location: str, output_location: str):
-    with open(input_location, "r") as f:
+def find_most_similar_comments(input_path: str, output_folder: str):
+    with open(input_path, "r") as f:
         comments = [i.strip() for i in f.readlines()]
     
-    model = SentenceTransformer("all-MiniLM-L12-v2")
+    model = SentenceTransformer("all-MiniLM-L6-v2")
     embeddings = model.encode(comments)
     similarity_mat = cosine_similarity(embeddings)
     np.fill_diagonal(similarity_mat, 0)
     max_index = int(np.argmax(similarity_mat))
     i, j = max_index // len(comments), max_index % len(comments)
     
-    with open(output_location, "w") as g:
+    with open(output_folder, "w") as g:
         g.write(comments[i] + "\n" + comments[j])
     
-    return {"status": "Successfully Created", "output_file destination": output_location}
+    return {"status": "Successfully Created", "output_file destination": output_folder}
 
 # A10: Calculate the total sales of all items in the "Gold" ticket type
 def calculate_gold_ticket_sales(input_path, output_folder):
@@ -282,7 +285,7 @@ json_task_prompt_desc = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "file_path": {
+                    "input_path": {
                         "type": "string",
                         "description": "Open and read the contents of '/data/dates.txt'."
                     },
@@ -291,7 +294,7 @@ json_task_prompt_desc = [
                         "description": "Write the count of Wednesdays to '/data/dates-wednesdays.txt'."
                     }
                 },
-                "required": ["file_path", "output_folder"]
+                "required": ["input_path", "output_folder"]
             }
         }
     },
@@ -324,7 +327,7 @@ json_task_prompt_desc = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "input_folder": {
+                    "input_path": {
                         "type": "string",
                         "description": "The directory that contains the log files."
                     },
@@ -333,7 +336,7 @@ json_task_prompt_desc = [
                         "description": "The path of the file where the extracted lines will be written."
                     }
                 },
-                "required": ["input_folder", "output_folder"]
+                "required": ["input_path", "output_folder"]
             }
         }
     },
@@ -345,7 +348,7 @@ json_task_prompt_desc = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "input_folder": {
+                    "input_path": {
                         "type": "string",
                         "description": "The directory containing Markdown files."
                     },
@@ -354,7 +357,7 @@ json_task_prompt_desc = [
                         "description": "The path of the file to write the index."
                     }
                 },
-                "required": ["input_folder", "output_folder"]
+                "required": ["input_path", "output_folder"]
             }
         }
     },
@@ -482,7 +485,7 @@ def task_runner(task: str):
         if re.search(pattern, task, re.IGNORECASE):
             raise HTTPException(status_code=400, detail="Task contains forbidden operations (deletion is not allowed).")
     
-    url = "http://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
+    url = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {AIPROXY_TOKEN}"
@@ -515,14 +518,14 @@ Use the appropriate tool based on the task description provided by the user.
         "tool_choice": "auto"
     }
 
-    response = requests.post(url=url, headers=headers, json=data)
+    response = requests.post(url=url, headers=headers, json=data, verify=False)
     response_json = response.json()
-    print(response_json)
+    # print(response_json)
     execute_task_call_info = response_json['choices'][0]['message']['tool_calls'][0]['function']
 
     execute_task_by_name = execute_task_call_info['name']
     arguments = json.loads(execute_task_call_info['arguments'])
-    path_keys = ["input_path", "output_folder", "input_folder", "file_path"]
+    path_keys = ["input_path","output_path", "output_folder", "file_path"]
 
     for key in path_keys:
         if key in arguments:

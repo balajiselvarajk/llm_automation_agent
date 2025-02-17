@@ -11,4 +11,3 @@ numpy
 requests
 sentence-transformers
 scikit-learn
-sqlite3

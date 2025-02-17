@@ -25,8 +25,6 @@ load_dotenv()
 # Access the AIPROXY_TOKEN variable
 AIPROXY_TOKEN = os.getenv('AIPROXY_TOKEN')
 
-# Print the token (for demonstration purposes, avoid printing sensitive information in production)
-print(f"AIPROXY_TOKEN: {aip_proxy_token}")
 
 app = FastAPI()
 

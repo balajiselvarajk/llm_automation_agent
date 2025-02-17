@@ -17,7 +17,6 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load API token from environment variable
-AIPROXY_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJhbGFqaS5zZWx2YXJhakBzdHJhaXZlLmNvbSJ9.k_dAv1Dk5HkY_COXzjDDne-2Z5FmbpF7RKkH7ECO51Q"
 
 # Load environment variables from .env file
 load_dotenv()

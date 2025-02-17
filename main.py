@@ -6,6 +6,7 @@ import sqlite3
 import subprocess
 from datetime import datetime
 from urllib import response
+from dotenv import load_dotenv
 
 import numpy as np
 import requests
@@ -17,6 +18,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # Load API token from environment variable
 AIPROXY_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJhbGFqaS5zZWx2YXJhakBzdHJhaXZlLmNvbSJ9.k_dAv1Dk5HkY_COXzjDDne-2Z5FmbpF7RKkH7ECO51Q"
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Access the AIPROXY_TOKEN variable
+AIPROXY_TOKEN = os.getenv('AIPROXY_TOKEN')
+
+# Print the token (for demonstration purposes, avoid printing sensitive information in production)
+print(f"AIPROXY_TOKEN: {aip_proxy_token}")
 
 app = FastAPI()
 
@@ -99,7 +109,7 @@ def extract_email_sender(input_path, output_folder):
         email_content = f.read()
     
     prompt = f"Extract the sender's email address from the following email content:\n\n{email_content}"
-    url = "https://llmfoundry.straive.com/openai/v1/chat/completions"
+    url = "http://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {AIPROXY_TOKEN}"
@@ -146,7 +156,7 @@ def extract_credit_card_number(input_path, output_folder):
     data_uri = f"data:image/png;base64,{image_b64}"
     
     # Define the API endpoint and headers
-    url = "https://llmfoundry.straive.com/openai/v1/chat/completions"
+    url = "http://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {AIPROXY_TOKEN}"
@@ -464,7 +474,7 @@ def task_runner(task: str):
         if re.search(pattern, task, re.IGNORECASE):
             raise HTTPException(status_code=400, detail="Task contains forbidden operations (deletion is not allowed).")
     
-    url = "https://llmfoundry.straive.com/openai/v1/chat/completions"
+    url = "http://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {AIPROXY_TOKEN}"

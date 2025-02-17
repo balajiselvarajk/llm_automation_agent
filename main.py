@@ -447,7 +447,18 @@ json_task_prompt_desc = [
 
 @app.get("/")
 def home():
-    return {"message": "Project 1 - LLM-based Automation Agent!"}
+    """
+    Display API documentation
+    """
+    return {
+        "name": "Project 1 - LLM-based Automation Agent!",
+        "version": "1.0",
+        "endpoints": {
+            "/run": "POST - Execute a task",
+            "/read": "GET - Read file contents",
+            "/": "GET - This documentation"
+        }
+    }
 
 @app.get("/read", response_class=PlainTextResponse)
 def read_file(path: str):
